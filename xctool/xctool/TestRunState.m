@@ -110,7 +110,16 @@
   NSAssert(_testSuiteState, @"Starting test without a test suite");
   NSString *testName = event[kReporter_BeginTest_TestKey];
   OCTestEventState *state = [_testSuiteState getTestWithTestName:testName];
-  NSAssert(state, @"Can't find test state for '%@', check senTestList", testName);
+  
+  if (!state)
+  {
+    NSString* origNameForm = [testName stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"-[]"]];
+    origNameForm = [origNameForm stringByReplacingOccurrencesOfString:@" " withString:@"/"];
+    state = [[OCTestEventState alloc] initWithInputName:origNameForm];
+    [_testSuiteState addTest:state];
+  }
+  
+  //NSAssert(state, @"Can't find test state for '%@', check senTestList", testName);
   [state stateBeginTest];
 
   [self publishEventToReporters:event];
